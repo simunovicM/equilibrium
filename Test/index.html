@@ -1,0 +1,175 @@
+﻿<!doctype html>
+<html>
+<head>
+	<script src="jquery-3.1.1.js"></script>
+	<script src="DataObserver.js"></script>
+	<link rel="stylesheet" href="bootstrap.min.css">
+	<script src="tether.min.js"></script>
+	<script src="bootstrap.min.js"></script>
+    <script src="js.storage.min.js"></script>
+</head>
+<body>
+<div id="elementId" class="p-3 col-sm-12 row">
+	<div class="p-3 mb-2 col-sm-12 {{spanClass}} row">
+		<div class="col-sm-7">
+			Insert number (<b>adds Math.pow(num,num) of elements</b>):
+			<input id="2" class="col-sm-3" emonchange="AddTableData(Math.pow(this.prop('id'),addnum))" empropdisabled="Not(checked)" title="{{TitleEnabledText(Not(checked))}}" emvalue="addnum"/>
+		</div>
+		<div class="col-sm-5 inline-block" id="historyDiv" style="display: none;">
+			<button class="btn btn-info" emonclick="HistoryGo(-1)" empropdisabled="Not(CanGo(-1))">Undo</button>
+			<button class="btn btn-info" emonclick="HistoryGo(1)" empropdisabled="Not(CanGo(1))">Redo</button>
+			<button class="btn btn-warning ml-5" emonclick="SaveHistory()">Save state</button>
+			<button class="btn btn-warning" emonclick="LoadHistory()">Load state</button>
+		</div>
+	</div>
+	<span class="p-3 mb-2 col-sm-12">
+		Select class for object on top: 
+		<select class="col-sm-5" emvalue="spanClass" empropdisabled="Not(checked)" title="{{TitleEnabledText(Not(checked))}}">
+			<option value="p-3 mb-2 bg-primary text-white">.bg-primary</option>
+			<option value="p-3 mb-2 bg-success text-white">.bg-success</option>
+			<option value="p-3 mb-2 bg-warning text-danger">.bg-warning</option>
+			<option value="p-3 mb-2 bg-danger text-white">.bg-danger</option>
+			<option value="p-3 mb-2 bg-info text-danger">.bg-info</option>
+			<option value="p-3 mb-2 bg-light text-dark">.bg-light</option>
+		</select>
+	</span>
+	<span class="p-3 mb-2 col-sm-12 text-center row">
+		<label class="col-sm-12">Play with selects</label>
+		<div class="p-3 mb-2 col-sm-6">
+			<select class="col-sm-6" emonchange="PickOpstina(opstinaId)" emvalue="opstinaId" empropdisabled="Not(checked)" title="{{TitleEnabledText(Not(checked))}}">
+				<option emrepeat="opstina in opstinas" value="{{opstina.Name}}">{{opstina.Name}}</option>
+			</select>
+			<select class="col-sm-6" emvalue="koId" empropdisabled="Not(checked)" title="{{TitleEnabledText(Not(checked))}}">
+				<option emrepeat="ko in KOs" value="{{ko.Name}}">{{ko.Name}}</option>
+			</select>
+		</div>
+		<div class="p-3 mb-2 col-sm-6">
+			<select class="col-sm-6" emonchange="PickOpstina(opstinaId)" emvalue="opstinaId" empropdisabled="Not(checked)" title="{{TitleEnabledText(Not(checked))}}">
+				<option emrepeat="opstina in opstinas" value="{{opstina.Name}}">{{opstina.Name}}</option>
+			</select>
+			<select class="col-sm-6" emvalue="koId" empropdisabled="Not(checked)" title="{{TitleEnabledText(Not(checked))}}">
+				<option emrepeat="ko in KOs" value="{{ko.Name}}">{{ko.Name}}</option>
+			</select>
+		</div>
+	</span>
+	
+	<span class="p-3 mb-2 col-sm-12 inline-block">
+		<div class="row justify-content-between">
+			<div class="col-4">
+				<input class="m-1" id="{{SomeNames[0]}}" type="checkbox" emchecked="checked"/>
+				<label for="{{SomeNames[0]}}"><b emvisible="{{Not(checked)}}">Click to enable elements</b><b emvisible="{{checked}}">Click to disable elements</b></label>
+			</div>
+			<div class="col-4">
+				<button class="btn btn-lg btn-success" emonclick="showHistory()"/>Click here for something special!</button>
+			</div>
+		</div>
+	</span>
+	<div class="p-3 mb-2 col-12 row">
+		<label class="col-sm-12 text-center">
+			You have total of {{TestData.length}} elements
+		</label>
+		<div class="col-4">
+			<label class="col-sm-12 text-center">
+				All test data
+			</label>
+			<table class="table">
+				<tbody>
+					<tr emrepeat="dat in TestData"><td>{{dat.id}}</td><td>{{dat.name}}</td><td>{{dat.value}}</td>
+					<td><input type='button' value="X" emonclick="RemoveMe(dat)" empropdisabled="Not(checked)" /></td></tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="col-4">
+			<label class="col-sm-12 text-center">
+				Even Id test data
+			</label>
+			<table class="table">
+				<tbody>
+					<tr emrepeat="dat in TestData" emfilter="DividedWith(dat.id,2)"><td>{{dat.id}}</td><td>{{dat.name}}</td><td>{{dat.value}}</td>
+					<td><input type='button' value="X" emonclick="RemoveMe(dat)" empropdisabled="checked"/></td></tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="col-4">
+			<label class="col-sm-12 text-center">
+				Odd Id test data
+			</label>
+			<table class="table">
+				<tbody>
+					<tr emrepeat="dat in TestData" emfilter="DividedWith(Sum(dat.id,1),2)"><td>{{dat.id}}</td><td>{{dat.name}}</td><td>{{dat.value}}</td>
+					<td><input emvalue="dat.name"/></td>
+					<td><input type='button' value="X" emonclick="RemoveMe(dat)" empropdisabled="checked"/></td></tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+<script>
+	var storage = Storages.localStorage;
+	var AddTableData = function(num) {
+		var firstId = sub.TestData.length === 0 ? 0: sub.TestData[sub.TestData.length-1].id + 1;
+		for (var i = 0; i < num; i++){
+			sub.TestData.push({name: "test name", id:firstId+i, value:firstId+i +175});
+		}
+		sub.Notify();
+	}
+	var TestTableData = function() {
+		var dat = [];
+		for (var i = 0; i < 10;i++){
+			dat.push({name: "test name", id:i, value:i +175});
+		}
+		return dat;
+	}
+	var DividedWith = function(num, div) {
+		return num % div === 0;
+	}
+	var TitleEnabledText = function(isEnabled) {
+		return (isEnabled) ? "Not enabled for editing!" : "You can edit this!";
+	};
+	var showHistory = function() {
+		$('#historyDiv').show();
+	};
+	var SaveHistory = function() {
+		storage.set("historyState", historyObserver.GetAllData());
+	};
+	var LoadHistory = function() {
+		historyObserver.RestoreHistoryData(storage.get("historyState"));
+		sub.Notify();
+	};
+	
+    var sub = new equilibrium.DataSubject();
+	var historyObserver = new equilibrium.HistoryObserver(100);
+	sub.AddObserver(historyObserver);
+	sub.CanGo = function(num) {
+		return historyObserver.CanGo(num);
+	}
+	sub.HistoryGo = function(num) {
+		historyObserver.HistoryGo(num).Notify();
+	}
+	sub.PickOpstina = function (id) {
+		var data = [{Id:3,Name:id + " - ko1"},{Id:4,Name:id + " - ko2"}];
+		sub.KOs = data;
+        sub.Notify();
+    }
+	sub.spanClass = "p-3 mb-2 bg-danger text-white";
+	sub.EnableDisableText = function() {
+		return (sub.checked) ? "Disable all":"Enable all";
+	}
+    sub.opstinas = [{Id:41,Name:"op1"},{Id:42,Name:"op2"}];
+    sub.checked = true;
+	sub.TestData = TestTableData();
+	sub.RemoveMe = function(dat) {
+		var ind = sub.TestData.indexOf(dat);
+		sub.TestData.splice(ind, 1);
+		sub.Notify();
+	}
+	sub.SomeNames = ["rand1", "rand2", "rand3"];
+    equilibrium.Bind(sub, $('#elementId'));
+	
+	function isPartOfElementInView(elem){
+		var toptobottom = $(elem)[0].getBoundingClientRect().top - window.innerHeight;
+		var bottomtotop = $(elem)[0].getBoundingClientRect().bottom;
+		return toptobottom < 0 && bottomtotop >0 ;
+	};
+</script>
+</body>

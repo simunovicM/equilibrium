@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<script src="jquery-3.1.1.js"></script>
+	<script src="DataObserver.js"></script>
+	<link rel="stylesheet" href="bootstrap.min.css">
+	<script src="tether.min.js"></script>
+	<script src="bootstrap.min.js"></script>
+    <script src="js.storage.min.js"></script>
+</head>
+<body>
+
+<div id="appdiv" class="col-12 p-3 text-center">
+    <input class="p-2 btn btn-lg btn-info" type="button" emonclick="FindPoints()" value="Find" />
+        <div class="col-sm-12 inline-block">
+            <button class="btn btn-sm {{BtnClass(page)}} m-1" emrepeat="page in pages" emonclick="SelectPage({{page}})">{{page}}</button>
+        </div>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th class="text-center {{SortedByClass(name)}}" emrepeat="name in tableHeaderNames" emonclick="SortPointsBy(name)">{{name}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr emvisible="Not(IsNotNullAndHasAny(points))"><td colspan="{{this.parents('table:first').find('thead').find('tr th').length}}">There is no data to show<td></tr>
+                <tr emrepeat="pnt in points" emfilter="IsOnPage(index, selectedPage)">
+                    <td>{{pnt.Name}}</td>
+                    <td>{{pnt.X}}</td>
+                    <td>{{pnt.Y}}</td>
+                    <td>{{pnt.Z}}</td>
+                    <td>{{pnt.Dist}}</td>
+                    <td>{{pnt.KoName}}</td>
+                    <td><a target="_blank" href="{{pnt.Link}}">Link</a></td>
+                </tr>
+            </tbody>
+        </table>
+</div>
+<script>
+    var sub = new equilibrium.DataSubject();
+	sub.MaxPage = 5;
+	sub.tableHeaderNames = ['Name', 'X', 'Y', 'Z', 'Dist', 'KO', 'Link'];
+    sub.FindPoints = function() {
+		sub.points = JSON.parse('[{"Id":1662,"Name":"P160","X":7470335.84,"Y":4905155.57,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.290344776915994,"Longitude":20.62286658004541,"Dist":29},{"Id":2510,"Name":"P972","X":7470345.54,"Y":4904970.55,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.2886799532114,"Longitude":20.62299869029398,"Dist":157},{"Id":1657,"Name":"P156","X":7470349.37,"Y":4904946.98,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.288467974970175,"Longitude":20.62304802556764,"Dist":181},{"Id":2505,"Name":"P968","X":7470503.11,"Y":4905205.81,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.2908037936509,"Longitude":20.62495965344513,"Dist":188},{"Id":1663,"Name":"P161","X":7470337.82,"Y":4905316.68,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.291794884085434,"Longitude":20.62288218507398,"Dist":190},{"Id":1656,"Name":"P155","X":7470528.26,"Y":4905112.59,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.289965818475736,"Longitude":20.625280082472045,"Dist":197},{"Id":2323,"Name":"P77","X":7470159.05,"Y":4905231.8,"Z":202.5,"Description":"Poligona","KoName":"БАЊА","Latitude":44.291023628943925,"Longitude":20.62064699684896,"Dist":202},{"Id":1751,"Name":"P239","X":7470526.31,"Y":4905037.24,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28928757181239,"Longitude":20.625259926232477,"Dist":214},{"Id":1669,"Name":"P167","X":7470460.72,"Y":4905318,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29181179762913,"Longitude":20.624422110300745,"Dist":230},{"Id":2324,"Name":"P78","X":7470096.61,"Y":4905011.75,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28904050786249,"Longitude":20.61987726251427,"Dist":262},{"Id":2506,"Name":"P969","X":7470255.16,"Y":4904876.25,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28782751855635,"Longitude":20.621871644232954,"Dist":262},{"Id":1655,"Name":"P154","X":7470621.54,"Y":4905223.44,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29096729112514,"Longitude":20.626442620080258,"Dist":305},{"Id":1750,"Name":"P238","X":7470528.67,"Y":4904865.23,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28773953857807,"Longitude":20.625299260414472,"Dist":327},{"Id":1668,"Name":"P166","X":7470571.6,"Y":4905353.01,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.292131418656695,"Longitude":20.62580950979136,"Dist":329},{"Id":1658,"Name":"P157","X":7470211.81,"Y":4904815.03,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28727473967665,"Longitude":20.62133199495267,"Dist":334},{"Id":2436,"Name":"P90","X":7470012.89,"Y":4905244.02,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.291127521042604,"Longitude":20.61881484324853,"Dist":340},{"Id":1753,"Name":"P241","X":7470357.99,"Y":4904787.09,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28702928196762,"Longitude":20.623165159836972,"Dist":341},{"Id":2313,"Name":"P76","X":7470207.34,"Y":4905444.3,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29293812565663,"Longitude":20.62123988013839,"Dist":341},{"Id":1664,"Name":"P162","X":7470327.03,"Y":4905473.45,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29320540577034,"Longitude":20.62273802011389,"Dist":346},{"Id":1742,"Name":"P230","X":7470710.67,"Y":4905023.85,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.289174552803985,"Longitude":20.62757070992243,"Dist":392},{"Id":1667,"Name":"P165","X":7470544.21,"Y":4905465.81,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29314552804878,"Longitude":20.625459896330803,"Dist":400},{"Id":2325,"Name":"P79","X":7470076.13,"Y":4904817.85,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28729451693462,"Longitude":20.61963182329127,"Dist":401},{"Id":1659,"Name":"P158","X":7470152.19,"Y":4904765.67,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28682802937736,"Longitude":20.620587820253757,"Dist":404},{"Id":1740,"Name":"P229","X":7470738.67,"Y":4905154.65,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.2903529169869,"Longitude":20.627914176675766,"Dist":408},{"Id":2424,"Name":"P89","X":7470053.6,"Y":4905425.84,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.292765628335715,"Longitude":20.61931446708794,"Dist":408},{"Id":1749,"Name":"P237","X":7470507.85,"Y":4904741.38,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28662401079841,"Longitude":20.625045427274227,"Dist":424},{"Id":1654,"Name":"P153","X":7470707.47,"Y":4905330.69,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29193605322405,"Longitude":20.627513300713705,"Dist":427},{"Id":1743,"Name":"P231","X":7470689.79,"Y":4904861.96,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28771665890953,"Longitude":20.627318223355022,"Dist":445},{"Id":2477,"Name":"P94","X":7469884.26,"Y":4905071.39,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28956846589562,"Longitude":20.61721307491357,"Dist":451},{"Id":1666,"Name":"P164","X":7470513.02,"Y":4905551,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.293910985028916,"Longitude":20.625064221293176,"Dist":461},{"Id":1665,"Name":"P163","X":7470304.42,"Y":4905593.08,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29428117326803,"Longitude":20.622447854955805,"Dist":467},{"Id":1660,"Name":"P159","X":7470095.9,"Y":4904709.33,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28631863039493,"Longitude":20.619885781533693,"Dist":480},{"Id":1765,"Name":"P267","X":7470064.49,"Y":4905528.8,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29369274166934,"Longitude":20.61944498959284,"Dist":483},{"Id":1670,"Name":"P168","X":7470609.54,"Y":4905523.5,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29366741059672,"Longitude":20.626275267420883,"Dist":484},{"Id":1581,"Name":"P1029","X":7469921.68,"Y":4904864.82,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28771084807041,"Longitude":20.61769391380324,"Dist":487},{"Id":1748,"Name":"P236","X":7470473.73,"Y":4904660.05,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28589062909684,"Longitude":20.624622547929,"Dist":488},{"Id":1739,"Name":"P228","X":7470781.68,"Y":4905327.35,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.291908996453756,"Longitude":20.628443380920316,"Dist":492},{"Id":2305,"Name":"P75","X":7470241.73,"Y":4905617.76,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29450072010601,"Longitude":20.62166086916301,"Dist":499},{"Id":2327,"Name":"P80","X":7470060.23,"Y":4904705.21,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.286280073161066,"Longitude":20.619439097328435,"Dist":502},{"Id":1766,"Name":"P268","X":7469873.35,"Y":4904893.07,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28796309198654,"Longitude":20.617086717574985,"Dist":515},{"Id":1735,"Name":"P224","X":7470824.77,"Y":4904968.68,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28868262462413,"Longitude":20.629003479199472,"Dist":518},{"Id":1671,"Name":"P169","X":7470683.28,"Y":4905517.94,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29362036444825,"Longitude":20.62719961131837,"Dist":526},{"Id":1744,"Name":"P232","X":7470653.22,"Y":4904699.44,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28625245717928,"Longitude":20.626869199266306,"Dist":535},{"Id":2413,"Name":"P88","X":7469873.86,"Y":4905416.44,"Z":202.84,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29267359941855,"Longitude":20.617062754931133,"Dist":542},{"Id":1734,"Name":"P223","X":7470783.54,"Y":4904805.12,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.287208881015935,"Longitude":20.628496076822913,"Dist":555},{"Id":1653,"Name":"P152","X":7470816.29,"Y":4905468.22,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29317825679383,"Longitude":20.628869143113285,"Dist":592},{"Id":1643,"Name":"P142","X":7470700.8,"Y":4905611.68,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29446475584592,"Longitude":20.627413861436754,"Dist":609},{"Id":2337,"Name":"P81","X":7469937.55,"Y":4904639.67,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.28568510757713,"Longitude":20.617905792282468,"Dist":627},{"Id":1733,"Name":"P222","X":7470754.28,"Y":4904641.06,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.2857311191166,"Longitude":20.628138702670736,"Dist":644},{"Id":2117,"Name":"P58","X":7469858.71,"Y":4905616.87,"Z":0,"Description":"Poligona","KoName":"БАЊА","Latitude":44.29447683845866,"Longitude":20.616861265729554,"Dist":681}]');
+		sub.pages = sub.points.filter(function(f, ind) { return ind % sub.MaxPage === 0; }).map(function(f, ind) { return ind + 1; });
+		sub.selectedPage = 1;
+		sub.Notify();
+    };
+    sub.SelectPage = function (num) { sub.selectedPage = num; sub.Notify(); };
+    sub.IsOnPage = function(ind, page) { return ind >= (page - 1) * sub.MaxPage && ind < page * sub.MaxPage;};
+	sub.BtnClass = function(page) { return page === sub.selectedPage ? "btn-warning":"btn-info";};
+	sub.SortPointsBy = function(f) {
+        var fncsort = function (arr) { return arr.sortby(f); };
+        tableObserver.SortFunctions = [fncsort];
+		sub.SortedBy = f;
+        sub.Notify();
+    };
+	sub.SortedByClass = function(name) { return (name === sub.SortedBy) ? "text-danger":"";};
+    equilibrium.Bind(sub, $('#appdiv'));
+	var tableObserver = sub.GetAllObservers()[3];
+</script>
+
+</body>
