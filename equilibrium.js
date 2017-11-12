@@ -1,4 +1,12 @@
-﻿if (!IsStringNullOrEmpty)
+﻿function async(fn, callback) {
+    setTimeout(function () {
+        fn();
+        if (callback)
+            callback();
+    }, 0);
+};
+
+if (!IsStringNullOrEmpty)
 	function IsStringNullOrEmpty(str) { return (!str || !str.trim()); }
 if (!IsNotNullAndHasAny)
 	function IsNotNullAndHasAny(f) { return f != null && f.length > 0; };
@@ -194,16 +202,17 @@ equilibrium.DataSubject = function () {
     this.AddObserver = function (observer) {
         observers.push(observer);
         observer.Parent = this;
+		observer.Subject = this;
     }
     this.RemoveObserver = function (observer) {
         var index = observers.indexOf(observer);
         observers.splice(index, 1);
     }
     this.GetAllObservers = function () { return observers; }
-    this.Notify = function () {
+    this.Notify = function() {
         var subject = this;
-        observers.forEach(function (f) { f.Update(subject); });
-    }
+        observers.forEach(function(f) { f.Update(subject); });
+    };
 }
 equilibrium.HistoryObserver = function (maxObservings) {
     var historyData = [];
@@ -236,29 +245,31 @@ equilibrium.HistoryObserver = function (maxObservings) {
     };
 };
 equilibrium.RepeatObserver = function ($comment, drawfnc) {
-    var data = null;
     var drawfunc = drawfnc;
     var templateChilds = equilibrium.GetParentWithAllChildrens(drawFunction(null));
     this.FilterFunctions = [];
     this.SortFunctions = [];
+	var observer = this;
+	this.Subject = null;
     this.Parent = null;
+    this.ParentObserver = null;
     this.RepeatProperty = '';
     this.RepeatPropertyShort = '';
     this.DrawedElements = [];
     function drawFunction(f) { return drawfunc(f); }
+	this.MaxDrawingsAtTime = 0;
+	var templateElement = $(drawFunction());
 
-    this.Update = function (dat) {
-        data = dat;
-        this.Redraw(data);
+    this.Update = function () {
+        observer.Redraw();
     }
-    this.Redraw = function (data) {
-        var repeatProperty = this.RepeatProperty;
-        var repeatPropertyShort = this.RepeatPropertyShort;
-        var subject = this.Parent;
-        var observer = this;
-        var arrData = this.FilteredData(data);
+    this.Redraw = function () {
+        var repeatProperty = observer.RepeatProperty;
+        var repeatPropertyShort = observer.RepeatPropertyShort;
+        var subject = observer.Parent;
+        var arrData = observer.FilteredData(observer.Parent);
         if (arrData) {
-            var DrawedElements = this.DrawedElements;
+            var DrawedElements = observer.DrawedElements;
             var newObservers = [];
             var drawedElements = [];
 
@@ -272,14 +283,22 @@ equilibrium.RepeatObserver = function ($comment, drawfnc) {
                     observers = DrawedElements[index];
                 else {
                     var element = $(drawFunction(dat));
-                    equilibrium.FindAllElements(element).forEach(function (f) {
-                        var obs = equilibrium.CreateRepeatObserverFromElement($(f));
-                        if (obs == null)
-                            obs = new equilibrium.ElementObserver($(f));
-                        obs = equilibrium.AttachFiltersToObserver(obs, $(f));
+                    FindAllElements(element).forEach(function (f, ind) {
+						var obs;
+						if (f.isRepeatObserver) {
+							obs = equilibrium.CreateRepeatObserverFromElement($(f.element));
+							obs = equilibrium.AttachFiltersToObserver(obs, $(f.element));
+						}
+						else {
+                            obs = new equilibrium.ElementObserver($(f.element), f.connectionTemplate);
+						};
                         observers.push(obs);
                     });
                     observers.push(new equilibrium.ElementObserver(element));
+                    observers.forEach(function (f) {
+                        f.ParentCollection = observers;
+                        f.ParentObserver = observer;
+                    });
                     drawedElements.push(element);
                     newObservers.push(observers);
                 };
@@ -287,60 +306,101 @@ equilibrium.RepeatObserver = function ($comment, drawfnc) {
                 scope[repeatPropertyShort] = dat;
                 scope.index = index;
 				scope.observer = observer;
-                observers.forEach(function (f) { f.Parent = scope; });
+                observers.forEach(function (f) { f.Subject = subject; f.Parent = scope; });
             });
-            var insertElements = drawedElements.map(function (f) { return f[0]; });
-            if (this.DrawedElements.length == 0)
-                $comment.after(insertElements);
-            else 
-				$(this.DrawedElements[this.DrawedElements.length - 1].last().LastDrawedElement()).after(insertElements);
-
-            this.DrawedElements = this.DrawedElements.concat(newObservers);
-            this.DrawedElements.forEach(function (f) { f.forEach(function (g) { g.Redraw(); }); });
+			var afterElement = (observer.DrawedElements.length == 0) ? $comment: $(observer.DrawedElements[observer.DrawedElements.length - 1].last().LastDrawedElement());
+			
+            observer.DrawedElements = observer.DrawedElements.concat(newObservers);
+			if (observer.MaxDrawingsAtTime == 0) {
+				observer.DrawedElements.forEach(function (f) { f.forEach(function (g) { g.Update(); }); });
+				afterElement.after(drawedElements);
+			} else {
+				afterElement.after(drawedElements);
+				
+				var start = 1 - observer.MaxDrawingsAtTime;
+				var forDrawing = function() { return observer.DrawedElements.filter(function(f,ind) { return ind >= start && ind < start + observer.MaxDrawingsAtTime;});};
+				var drawer = function() { 
+					forDrawing().forEach(function (f) { f.forEach(function (g) { g.Update(); }); });
+				};
+				var callback = function() { start += observer.MaxDrawingsAtTime; drawFewElements();};
+				var drawFewElements = function() {
+					if (IsNotNullAndHasAny(forDrawing()))
+						async(drawer, callback);
+				};
+				drawer();
+				drawFewElements();
+			};
         }
     }
-
+	var allElementsPattern = null;
+	var FindAllElements = function(element) {
+		var allElements = equilibrium.GetAllChildrens(element);
+		if (allElementsPattern == null) {
+			var allUsedEls = equilibrium.FindAllElements(element);
+			allElementsPattern = allUsedEls.map(function(f) { return { index: allElements.indexOf(f), isRepeatObserver: $(f).attr('emrepeat') != null};});
+			allElementsPattern.forEach(function(f, ind) { if (!f.isRepeatObserver) {
+				var ells = [allUsedEls[ind]];
+				var connection = equilibrium.ConnectElementsAndParts(ells, ells);
+				var childNodes = $.makeArray(ells[0].childNodes).concat($.makeArray(ells[0].attributes));
+				f.connectionTemplate = connection.map(function(f) { return {template: f.template, index: childNodes.indexOf(f.element)}});
+			};});
+		};
+		var ret = DeepCloneArray(allElementsPattern);
+		ret.forEach(function(f) {f.element = allElements[f.index];});
+		return ret;
+	};
     this.FilteredData = function () {
-        var scope = equilibrium.getScopeFromString(this.Parent, this.RepeatProperty);
+        var scope = equilibrium.getScopeFromString(observer.Parent, observer.RepeatProperty);
         if (scope == null)
             return;
 
         var filtered = equilibrium.scopeValue(scope.scope, scope.property, scope.topParent);
-        this.SortFunctions.forEach(function (f) { filtered = f(filtered); });
+        observer.SortFunctions.forEach(function (f) { filtered = f(filtered); });
 
-        var repeatPropertyShort = this.RepeatPropertyShort;
-        this.FilterFunctions.forEach(function (f) { filtered = filtered.filter(function (dat, ind) { return f(dat, ind, scope.scope, repeatPropertyShort); }); });
+        var repeatPropertyShort = observer.RepeatPropertyShort;
+        observer.FilterFunctions.forEach(function (f) { filtered = filtered.filter(function (dat, ind) { return f(dat, ind, observer.Parent, scope.topParent, repeatPropertyShort); }); });
 
         return filtered;
     }
-    this.LastDrawedElement = function () { return (this.DrawedElements.length == 0) ? $comment : this.DrawedElements[this.DrawedElements.length - 1].LastDrawedElement() };
-    this.RemoveAll = function () { $($comment).remove(); this.DrawedElements.forEach(function (f) { f.forEach(function (g) { g.RemoveAll(); }); }); $comment = null; this.DrawedElements = null; };
+    this.LastDrawedElement = function () { return (observer.DrawedElements.length == 0) ? $comment : observer.DrawedElements[observer.DrawedElements.length - 1].LastDrawedElement() };
+    this.RemoveAll = function () { $($comment).remove(); observer.DrawedElements.forEach(function (f) { f.forEach(function (g) { g.RemoveAll(); }); }); $comment = null; observer.DrawedElements = null; };
+    this.TopParentObserver = function() { return (observer.ParentObserver == null) ? observer : observer.ParentObserver.TopParentObserver(); };
 }
-equilibrium.ElementObserver = function ($elem) {
+equilibrium.ElementObserver = function ($elem, pattern) {
     var $element = $elem;
-    var templateChilds = [$($element[0].outerHTML)];
     var allElements = [$elem];
-    var elementsAndParts = equilibrium.ConnectElementsAndParts(allElements, templateChilds);
-    var data = null;
+	var observer = this;
+	this.Subject = null;
     this.Parent = null;
+    this.ParentObserver = null;
 
     this.Update = function (dat) {
-        data = dat;
-        this.Redraw(data);
+        observer.Redraw();
     }
 
     var isFirstTime = true;
     this.Redraw = function () {
-        equilibrium.ReplaceScopeValues(elementsAndParts, this.Parent);
-        equilibrium.ChangePropValues(allElements, this.Parent, this);
+        equilibrium.ReplaceScopeValues(elementsAndParts, observer.Parent);
+        equilibrium.ChangePropValues(allElements, observer.Parent, observer);
 
         if (isFirstTime) {
-            equilibrium.BindOnValues(allElements, this.Parent, this);
+            equilibrium.BindOnValues(allElements, observer.Parent, observer);
             isFirstTime = false;
         }
     }
     this.LastDrawedElement = function () { return allElements[0]; };
     this.RemoveAll = function () { $($element).remove(); $element = null; };
+    this.TopParentObserver = function () { return (observer.ParentObserver == null) ? observer : observer.ParentObserver.TopParentObserver(); };
+	var GetElementsAndParts = function(element, pattern) {
+		if (pattern == null) 
+			return equilibrium.ConnectElementsAndParts([element], [element]);
+		else {
+			var childNodes =$.makeArray(element[0].childNodes).concat($.makeArray(element[0].attributes));
+			return pattern.map(function(f) {return {template: f.template, element: childNodes[f.index]}});
+		};
+	};
+	
+    var elementsAndParts = GetElementsAndParts($elem, pattern);
 }
 equilibrium.CreateRepeatObserverFromElement = function (element) {
     var repeatattr = element.attr('emrepeat');
@@ -359,11 +419,11 @@ equilibrium.CreateRepeatObserverFromElement = function (element) {
 equilibrium.AttachFiltersToObserver = function (obs, element) {
     var filterattr = $(element).attr('emfilter');
     if (filterattr) {
-        var fnc = function (dat, index, subject, repeatPropertyShort) {
+        var fnc = function (dat, index, subject, topParent, repeatPropertyShort) {
             subject = equilibrium.CopyAllProperties(subject);
             subject[repeatPropertyShort] = dat;
             subject.index = index;
-            var scope = equilibrium.getScopeFromString(subject, filterattr);
+            var scope = equilibrium.getScopeFromString(subject, filterattr, null, null, topParent);
             return equilibrium.scopeValue(scope.scope, scope.property, subject);
         };
         obs.FilterFunctions.push(fnc);
@@ -389,11 +449,13 @@ equilibrium.ReplaceScopeValues = function(connection, scope) {
     scope = equilibrium.CopyAllProperties(scope);
     connection.forEach(function (conn, index) {
         scope['this'] = $(conn.parent);
-        if (conn.isAtribute)
-            conn.element.value = equilibrium.ReplaceValues(conn.template, scope);
-        else
-            conn.element.nodeValue = equilibrium.ReplaceValues(conn.template, scope);
-	});
+        var value = equilibrium.ReplaceValues(conn.template, scope);
+        if (conn.isAtribute) {
+            if (conn.element.value != value) conn.element.value = value;
+        } else {
+            if (conn.element.nodeValue != value) conn.element.nodeValue = value;
+        };
+    });
 }
 equilibrium.ReplaceValues = function (containerstring, subject) {
     var subj = subject;
@@ -450,10 +512,12 @@ equilibrium.ChangePropValues = function (mainContainer, subject, observer) {
     });
 };
 
-equilibrium.allOnFncs = ["abort", "auxclick", "beforecopy", "beforecut", "beforepaste", "blur", "cancel", "canplay", "canplaythrough", "change", "click", "close", "contextmenu", "copy", "cuechange", "cut", "dblclick", "drag", "dragend", "dragenter", "dragleave", "dragover", "dragstart", "drop", "durationchange", "emptied", "ended", "error", "focus", "gotpointercapture", "input", "invalid", "keydown", "keypress", "keyup", "load", "loadeddata", "loadedmetadata", "loadstart", "lostpointercapture", "mousedown", "mouseenter", "mouseleave", "mousemove", "mouseout", "mouseover", "mouseup", "mousewheel", "paste", "pause", "play", "playing", "pointercancel", "pointerdown", "pointerenter", "pointerleave", "pointermove", "pointerout", "pointerover", "pointerup", "progress", "ratechange", "reset", "resize", "scroll", "search", "seeked", "seeking", "select", "selectstart", "stalled", "submit", "suspend", "timeupdate", "toggle", "volumechange", "waiting", "webkitfullscreenchange", "webkitfullscreenerror", "wheel"];
+equilibrium.allOnFncs = [];// ["abort", "auxclick", "beforecopy", "beforecut", "beforepaste", "blur", "cancel", "canplay", "canplaythrough", "change", "click", "close", "contextmenu", "copy", "cuechange", "cut", "dblclick", "drag", "dragend", "dragenter", "dragleave", "dragover", "dragstart", "drop", "durationchange", "emptied", "ended", "error", "focus", "gotpointercapture", "input", "invalid", "keydown", "keypress", "keyup", "load", "loadeddata", "loadedmetadata", "loadstart", "lostpointercapture", "mousedown", "mouseenter", "mouseleave", "mousemove", "mouseout", "mouseover", "mouseup", "mousewheel", "paste", "pause", "play", "playing", "pointercancel", "pointerdown", "pointerenter", "pointerleave", "pointermove", "pointerout", "pointerover", "pointerup", "progress", "ratechange", "reset", "resize", "scroll", "search", "seeked", "seeking", "select", "selectstart", "stalled", "submit", "suspend", "timeupdate", "toggle", "volumechange", "waiting", "webkitfullscreenchange", "webkitfullscreenerror", "wheel"];
 equilibrium.GetOnValues = function () {
     var onfnc = function (property, subject, observer, control, name, unbindedfnc) {
-        var scope = equilibrium.getScopeFromString(observer.Parent, control.attr(name), $(control).data(), control);
+        var sub = equilibrium.CopyAllProperties(observer.Parent);
+        sub.observer = observer;
+        var scope = equilibrium.getScopeFromString(sub, control.attr(name), $(control).data(), control);
         if (scope === undefined)
             throw control.attr(name) + " is undefined!";
         equilibrium.scopeValue(scope.scope, scope.property, scope.topParent);
@@ -464,7 +528,7 @@ equilibrium.GetOnValues = function () {
     }
     return equilibrium.allOnFncs.map(function (f) { return { name: 'emon' + f, on: f, fncon: onfnc }; });
 }
-equilibrium.allPropFncs = ["classList", "className", "clientHeight", "clientLeft", "clientTop", "clientWidth", "checked", 'disabled', "draggable", "hidden", "id", "isContentEditable", "lang", "offsetHeight", "offsetLeft", "offsetTop", "offsetWidth", "scrollHeight", "scrollTop", "scrollWidth", "slot", "spellcheck", 'src', "tabIndex", "title", "translate", "type", "value"];
+equilibrium.allPropFncs = [];// ["classList", "className", "clientHeight", "clientLeft", "clientTop", "clientWidth", "checked", 'disabled', "draggable", "hidden", "id", "isContentEditable", "lang", "offsetHeight", "offsetLeft", "offsetTop", "offsetWidth", "scrollHeight", "scrollTop", "scrollWidth", "slot", "spellcheck", 'src', "tabIndex", "title", "translate", "type", "value"];
 equilibrium.GetPropValues = function () {
     var fnc = function (property, subject, observer, control, name) {
         var scope = equilibrium.getScopeFromString(subject, control.attr(name), $(control).data(), control);
@@ -508,7 +572,7 @@ equilibrium.GetPropValues = function () {
 			{ name: 'emvisible', property: 'null', on: 'null', fnc: fnctoggle, fncon: fncempty }
     ].concat(equilibrium.allPropFncs.map(function (f) { return { name: 'emprop' + f, property: f, on: 'null', fnc: fnc, fncon: fncempty }; }));
 }
-equilibrium.allAttrFncs = ["classList", "className", "clientHeight", "clientLeft", "clientTop", "clientWidth", "checked", 'disabled', "draggable", "hidden", "id", "isContentEditable", "lang", "offsetHeight", "offsetLeft", "offsetTop", "offsetWidth", "scrollHeight", "scrollTop", "scrollWidth", "slot", "spellcheck", 'src', "tabIndex", "title", "translate", "type", "value"];
+equilibrium.allAttrFncs = []; // ["classList", "className", "clientHeight", "clientLeft", "clientTop", "clientWidth", "checked", 'disabled', "draggable", "hidden", "id", "isContentEditable", "lang", "offsetHeight", "offsetLeft", "offsetTop", "offsetWidth", "scrollHeight", "scrollTop", "scrollWidth", "slot", "spellcheck", 'src', "tabIndex", "title", "translate", "type", "value"];
 equilibrium.GetAttrValues = function () {
     var fnc = function (property, subject, observer, control, name) {
         var scope = equilibrium.getScopeFromString(subject, control.attr(name), $(control).data(), control);
@@ -772,9 +836,15 @@ equilibrium.Bind = function (subject, topParent) {
         elements.forEach(function (element) {
             element = $(element);
             var obs = equilibrium.CreateRepeatObserverFromElement(element);
-            if (obs != null)
+            if (obs != null) {
+				var maxdrawingatattr = element.attr('emmaxdrawings');
+				 if (maxdrawingatattr) {
+					var maxDrawing = parseFloat(maxdrawingatattr);
+					if (!isNaN(maxDrawing) && maxDrawing > 0) 
+						obs.MaxDrawingsAtTime = maxDrawing;
+				 };
                 subject.AddObserver(obs);
-            else
+            } else
                 obs = singleObservers.push(new equilibrium.ElementObserver(element));
 
             obs = equilibrium.AttachFiltersToObserver(obs, element);
@@ -790,17 +860,16 @@ equilibrium.Bind = function (subject, topParent) {
     var props = allAttributes.filter(function (f) { return f.startsWith('emprop'); }).map(function (f) { return f.substring(6); });
     var ons = allAttributes.filter(function (f) { return f.startsWith('emon'); }).map(function (f) { return f.substring(4); });
 
-    equilibrium.allAttrFncs = [];
+    //equilibrium.allAttrFncs = [];
     attrs.forEach(function (f) { if (equilibrium.allAttrFncs.find(function (g) { return g === f; }) == null) equilibrium.allAttrFncs.push(f); })
-    equilibrium.allPropFncs = [];
+    //equilibrium.allPropFncs = [];
     props.forEach(function (f) { if (equilibrium.allPropFncs.find(function (g) { return g === f; }) == null) equilibrium.allPropFncs.push(f); })
-    equilibrium.allOnFncs = [];
+    //equilibrium.allOnFncs = [];
     ons.forEach(function (f) { if (equilibrium.allOnFncs.find(function (g) { return g === f; }) == null) equilibrium.allOnFncs.push(f); })
 
     var elements = equilibrium.FindAllElements(topParent);
     subject.AddObserver(new equilibrium.ElementObserver(topParent));
     newObservers(elements, subject);
-    subject.Notify();
 }
 equilibrium.FindAllElements = function (topParent) {
     var groupAttributes = ['emrepeat'];
