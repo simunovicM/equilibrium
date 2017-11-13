@@ -282,7 +282,7 @@ equilibrium.RepeatObserver = function ($comment, drawfnc) {
                 if (DrawedElements.length > index)
                     observers = DrawedElements[index];
                 else {
-                    var element = $(drawFunction(dat));
+					var element = templateElement.clone();
                     FindAllElements(element).forEach(function (f, ind) {
 						var obs;
 						if (f.isRepeatObserver) {
@@ -484,16 +484,15 @@ equilibrium.BindOnValues = function (mainContainer, subject, observer) {
     var onvalues = equilibrium.GetPropValues().concat(equilibrium.GetOnValues()).map(addSubject);
 
     onvalues.forEach(function (f) {
-        $.makeArray(f.mainContainer).forEach(function (container) {
-            var control = $(container);
-            if (control.attr(f.name) != null) {
+        f.mainContainer.forEach(function (container) {
+            if (container.attr(f.name) != null) {
                 var jsOnFnc = 'on' + f.on;
-                var jsFnc = $(container).attr(jsOnFnc);
+                var jsFnc = container.attr(jsOnFnc);
                 var fnc = function () {
-                    f.fncon(f.property, f.subject, f.observer, control, f.name, jsFnc);
+                    f.fncon(f.property, f.subject, f.observer, container, f.name, jsFnc);
                 };
-                control.on(f.on, fnc);
-                $(container)[0][jsOnFnc] = null;
+                container.on(f.on, fnc);
+                container[0][jsOnFnc] = null;
             };
         });
     });
@@ -503,10 +502,9 @@ equilibrium.ChangePropValues = function (mainContainer, subject, observer) {
     propvalues = equilibrium.GetPropValues().concat(equilibrium.GetAttrValues()).map(addSubject);
 
     propvalues.forEach(function (f) {
-        $.makeArray(f.mainContainer).forEach(function (container) {
-            var control = $(container);
-            if (control.attr(f.name)) {
-                f.fnc(f.property, f.observer.Parent, f.observer, control, f.name);
+        f.mainContainer.forEach(function (container) {
+            if (container.attr(f.name)) {
+                f.fnc(f.property, f.observer.Parent, f.observer, container, f.name);
             };
         });
     });
@@ -557,8 +555,8 @@ equilibrium.GetPropValues = function () {
             equilibrium.insertPropToScope(observer.Parent, control.attr(name));
         else if (scope.scope[scope.property] != $(control).prop(property)) {
             scope.scope[scope.property] = $(control).prop(property);
-            equilibrium.CopyValuesFromObject(scope.topParent, subject);
-            subject.Notify();
+            equilibrium.CopyValuesFromObject(scope.topParent, observer.Subject);
+            observer.Subject.Notify();
         };
         if (unbindedfnc) {
             var fncscope = equilibrium.getScopeFromString(window, unbindedfnc, null, $(control)[0]);
@@ -931,6 +929,11 @@ equilibrium.CopyJustFunctions = function(fromObject, toObject) {
         if (typeof fromObject[k] === "function")
             toObject[k] = fromObject[k];
     return toObject;
+}
+equilibrium.PropertiesToArray = function (fromObject) {
+    var arr = [];
+    for (var k in fromObject) arr.push(fromObject[k]);
+    return arr;
 }
 
 function UnloadDataOnExit(fnc) {
