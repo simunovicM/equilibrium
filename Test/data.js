@@ -41,7 +41,7 @@
 		var selectedRange = null;
 		var selectedIndex = null;
 		sub.ChangeDeletedMulty = function(symbol, index, observer) {
-			var dat = observer.FilteredData();
+			var dat = observer.ParentObserver.FilteredData();
 			symbol.Deleted = !symbol.Deleted;
 			var checked = symbol.Deleted;
 			var s1 = selectedIndex;
@@ -50,7 +50,7 @@
 				sub = historyObserver.HistoryGo(-1);
 			selectedRange = GetRange(Math.min(s1,s2), Math.max(s1,s2));
 			
-			observer.FilteredData().forEach(function(f,ind) { if (selectedRange.indexOf(ind) > -1) f.Deleted = checked; });
+			observer.ParentObserver.FilteredData().forEach(function(f,ind) { if (selectedRange.indexOf(ind) > -1) f.Deleted = checked; });
 			sub.Notify();
 		};
 		sub.DeleteFunctionToCall = function(symbol, index, observer) { return (!sub.shiftDown || selectedRange == null) ? sub.ChangeDeletedSingle(symbol, index, observer) : sub.ChangeDeletedMulty(symbol, index,observer); };

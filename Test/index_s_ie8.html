@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="jquery.min-1.12.4.js"></script>
+    <script src="equilibrium.js"></script>
+	<link rel="stylesheet" href="bootstrap.min-3.3.7.css">
+	<link rel="stylesheet" href="bootstrap-theme.min-3.3.7.css">
+	<script src="bootstrap.min-3.3.7.js"></script>
+    <script src="html5shiv.js"></script>
+    <script src="respond.min.js"></script>
+	<script src="jquery-ui-1.12.1.js"></script>
+
+    <link href="iChemistry/NewStyle/commonV4.css" rel="stylesheet" />
+    <link href="iChemistry/NewStyle/jquery-ui.css" rel="stylesheet" />
+    <link href="iChemistry/NewStyle/chosen.css" rel="stylesheet" />
+    <link href="iChemistry/NewStyle/custom-uiV4.css" rel="stylesheet" />
+    <link href="iChemistry/NewStyle/dropdown_for_imagesV4.css" rel="stylesheet" />
+</head>
+<body>
+	<div id="urlsid"><span class="btn btn-warning" emrepeat="page in pages" emonclick="SetPage(page)">{{page}}</span></div>
+    <div id='element1' emvisible="ShouldPageBeVisible(1)" class="col-sm-6 row">
+        <div class="col-sm-12 border border-top-0 border-right-0 border-left-0">
+            <h5>Symbols 1</h5>
+        </div>
+
+        <div class="px-3 pt-1">
+		    <div emrepeat="stype in symbolTypes" class="symbolWrap">
+                <p class="pb-2">{{stype.name}}</p>
+                <div class="symbol chosen" emrepeat='symbol in FilterSymbols(allSymbols,stype.symbols)' emfilter="Not(symbol.Deleted)">
+                    <img alt="" class="closeBtn" emonclick="RemoveSymbol(symbol)" src="#" />
+                    <img class="iconPx45" emattrsrc="GetLocationRoot().concat('Symbols/{{symbol.Name}}.png')" alt="" />
+                </div>
+                <a id="" class="mainButton btn" href="#:" emonclick="ShowSymbols(stype.symbols,stype.name,observer)"><span class="buttonImg AddButton">&nbsp;</span><span>Add</span></a>
+            </div>
+        </div>
+
+        <div id="symbol_wrapper" class="inline-block">
+			<div class='m-3'>
+            <div class="d-inline" emrepeat='symbol in allSymbols' emfilter="FilterAllSymbols(symbol)">
+                <div class="symbol mx-25 m-3 {{BorderClass(index)}}">
+                    <img class="d-block iconPx45 m-auto cursor" alt="symbol.Name" emonclick="DeleteFunctionToCall(symbol,index, observer)" empropsrc="GetLocationRoot().concat('Symbols/{{symbol.Name}}.png')">
+                    <input class="form-check m-auto" type="checkbox" emonclick="DeleteFunctionToCall(symbol,index, observer)" empropchecked="Not(symbol.Deleted)">
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+	<div id='element2'  emvisible="ShouldPageBeVisible(2)" class="col-sm-6 row">
+        <div class="col-sm-12 border border-top-0 border-right-0 border-left-0">
+            <h5>Symbols 2</h5>
+        </div>
+
+        <div class="px-3 pt-1">
+		    <div emrepeat="stype in symbolTypes" class="symbolWrap">
+                <p class="pb-2">{{stype.name}}</p>
+                <div class="symbol chosen" emrepeat='symbol in FilterSymbols(allSymbols,stype.symbols)'>
+                    <img class="d-block iconPx45 m-auto cursor" alt="symbol.Name" emonclick="ChangeDeletedSingle(symbol)" empropsrc="GetLocationRoot().concat('Symbols/{{symbol.Name}}.png')">
+                    <input class="form-check m-auto" type="checkbox" emonclick="ChangeDeletedSingle(symbol)" empropchecked="Not(symbol.Deleted)">
+                </div>
+            </div>
+        </div>
+    </div>
+	<div id='element3' emvisible="ShouldPageBeVisible(3)" class="col-sm-6 row">
+        <div class="col-sm-12 border border-top-0 border-right-0 border-left-0">
+            <h5>Symbols 3</h5>
+        </div>
+	</div>
+	<script src="data.js"></script>
+</body>
+</html>

@@ -23,7 +23,7 @@
             </thead>
             <tbody>
                 <tr emvisible="Not(IsNotNullAndHasAny(points))"><td colspan="7">There is no data to show<td></tr>
-                <tr emrepeat="pnt in points" emfilter="IsOnPage(index, selectedPage)">
+                <tr emrepeat="pnt in points" emfilter="IsOnPage(index, selectedPage)" emsort="SortPoints(points)">
                     <td>{{pnt.Name}}</td>
                     <td>{{pnt.X}}</td>
                     <td>{{pnt.Y}}</td>
@@ -49,14 +49,14 @@
     sub.IsOnPage = function(ind, page) { return ind >= (page - 1) * sub.MaxPage && ind < page * sub.MaxPage;};
 	sub.BtnClass = function(page) { return page === sub.selectedPage ? "btn-warning":"btn-info";};
 	sub.SortPointsBy = function(f) {
-        var fncsort = function (arr) { return arr.sortby(f); };
-        tableObserver.SortFunctions = [fncsort];
 		sub.SortedBy = f;
         sub.Notify();
     };
+	sub.SortPoints = function(points) {
+		return points.sortby(sub.SortedBy);
+    };
 	sub.SortedByClass = function(name) { return (name === sub.SortedBy) ? "text-danger":"";};
     sub.Bind($('#appdiv')).Notify();
-	var tableObserver = sub.GetAllObservers()[3];
 </script>
 
 </body>

@@ -290,6 +290,7 @@ equilibrium.RepeatObserver = function ($comment, drawfnc) {
 						if (f.isRepeatObserver) {
 							obs = equilibrium.CreateRepeatObserverFromElement(f.element);
 							obs = equilibrium.AttachFiltersToObserver(obs, f.element);
+							obs = equilibrium.AttachSortToObserver(obs, f.element);
 						}
 						else {
                             obs = new equilibrium.ElementObserver(f.element, f.connectionTemplate);
@@ -358,7 +359,7 @@ equilibrium.RepeatObserver = function ($comment, drawfnc) {
             return;
 
         var filtered = equilibrium.scopeValue(scope.scope, scope.property, scope.topParent);
-        observer.SortFunctions.forEach(function (f) { filtered = f(filtered); });
+        observer.SortFunctions.forEach(function (f) { filtered = f(filtered, observer.Parent, scope.topParent, observer.RepeatProperty); });
 
         var repeatPropertyShort = observer.RepeatPropertyShort;
         observer.FilterFunctions.forEach(function (f) { filtered = filtered.filter(function (dat, ind) { return f(dat, ind, observer.Parent, scope.topParent, repeatPropertyShort); }); });
@@ -421,16 +422,29 @@ equilibrium.CreateRepeatObserverFromElement = function (element) {
     };
 };
 equilibrium.AttachFiltersToObserver = function (obs, element) {
-    var filterattr = $(element).attr('emfilter');
+    var filterattr = element.attributes['emfilter'];
     if (filterattr) {
         var fnc = function (dat, index, subject, topParent, repeatPropertyShort) {
             subject = equilibrium.CopyAllProperties(subject);
             subject[repeatPropertyShort] = dat;
             subject.index = index;
-            var scope = equilibrium.getScopeFromString(subject, filterattr, null, null, topParent);
+            var scope = equilibrium.getScopeFromString(subject, filterattr.value, null, null, topParent);
             return equilibrium.scopeValue(scope.scope, scope.property, subject);
         };
         obs.FilterFunctions.push(fnc);
+    }
+    return obs;
+};
+equilibrium.AttachSortToObserver = function (obs, element) {
+    var sortattr = element.attributes['emsort'];
+    if (sortattr) {
+        var fnc = function (dats, subject, topParent, repeatProperty) {
+            subject = equilibrium.CopyAllProperties(subject);
+            subject[repeatProperty] = dats;
+            var scope = equilibrium.getScopeFromString(subject, sortattr.value, null, null, topParent);
+            return equilibrium.scopeValue(scope.scope, scope.property, subject);
+        };
+        obs.SortFunctions.push(fnc);
     }
     return obs;
 };
@@ -854,11 +868,11 @@ equilibrium.Bind = function (subject, topParent) {
 					if (!isNaN(maxDrawing) && maxDrawing > 0) 
 						obs.MaxDrawingsAtTime = maxDrawing;
 				 };
+				obs = equilibrium.AttachFiltersToObserver(obs, element);
+				obs = equilibrium.AttachSortToObserver(obs, element);
                 subject.AddObserver(obs);
             } else
                 obs = singleObservers.push(new equilibrium.ElementObserver(element));
-
-            obs = equilibrium.AttachFiltersToObserver(obs, element);
         });
         singleObservers.forEach(function (f) { subject.AddObserver(f); });
     }
