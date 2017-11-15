@@ -1,4 +1,4 @@
-Javascript binder - visualizing like never before
+Javascript binder - Bind data like never before
 
 I always liked the way angularjs binds elements (and did not like the way it doesn't support other
 UIs). In the company I work right now it was not possibile to implement angularjs into existing 
