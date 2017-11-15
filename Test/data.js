@@ -1,7 +1,5 @@
 	var test = new equilibrium.DataSubject();
 		test.products = [{name: "test1", substances:[1,2,3]},{name: "test2", substances:[4,5,6]}];
-		// equilibrium.AutomaticallyAddObservers(test, $('#testId'));
-        // test.Notify();
 		function shiftChanged(shiftDown) {
 			if (sub.shiftDown !== shiftDown) {
 				sub.shiftDown = shiftDown;
@@ -68,10 +66,10 @@
 		sub.ShouldPageBeVisible = function(page) { return page == sub.selectedPage;};
 		sub.SetPage = function(page) {sub.selectedPage = page; sub.Notify(); };
 		sub.GetImageUrl = function(name) { return GetLocationRoot() + 'Symbols/' + name + '.png';};
-        equilibrium.Bind(sub, $('#urlsid'));
-        equilibrium.Bind(sub, $('#element1'));
-		equilibrium.Bind(sub, $('#element2'));
-		equilibrium.Bind(sub, $('#element3'));
+        sub.Bind($('#urlsid'));
+        sub.Bind($('#element1'));
+		sub.Bind($('#element2'));
+		sub.Bind($('#element3'));
         sub.Notify();
 		
         $('#symbol_wrapper').dialog({

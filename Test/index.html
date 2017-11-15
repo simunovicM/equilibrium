@@ -2,7 +2,7 @@
 <html>
 <head>
 	<script src="jquery-3.1.1.js"></script>
-	<script src="DataObserver.js"></script>
+	<script src="equilibrium.js"></script>
 	<link rel="stylesheet" href="bootstrap.min.css">
 	<script src="tether.min.js"></script>
 	<script src="bootstrap.min.js"></script>
@@ -164,7 +164,7 @@
 		sub.Notify();
 	}
 	sub.SomeNames = ["rand1", "rand2", "rand3"];
-    equilibrium.Bind(sub, $('#elementId'));
+    sub.Bind($('#elementId')).Notify();
 	
 	function isPartOfElementInView(elem){
 		var toptobottom = $(elem)[0].getBoundingClientRect().top - window.innerHeight;

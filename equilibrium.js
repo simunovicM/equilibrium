@@ -213,6 +213,10 @@ equilibrium.DataSubject = function () {
         var subject = this;
         observers.forEach(function(f) { f.Update(subject); });
     };
+	this.Bind = function(element) {
+		equilibrium.Bind(this, $(element));
+		return this;
+	};
 }
 equilibrium.HistoryObserver = function (maxObservings) {
     var historyData = [];

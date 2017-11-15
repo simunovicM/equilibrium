@@ -2,7 +2,7 @@
 <html>
 <head>
 	<script src="jquery-3.1.1.js"></script>
-	<script src="DataObserver.js"></script>
+	<script src="equilibrium.js"></script>
 	<link rel="stylesheet" href="bootstrap.min.css">
 	<script src="tether.min.js"></script>
 	<script src="bootstrap.min.js"></script>
@@ -22,7 +22,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr emvisible="Not(IsNotNullAndHasAny(points))"><td colspan="{{this.parents('table:first').find('thead').find('tr th').length}}">There is no data to show<td></tr>
+                <tr emvisible="Not(IsNotNullAndHasAny(points))"><td colspan="7">There is no data to show<td></tr>
                 <tr emrepeat="pnt in points" emfilter="IsOnPage(index, selectedPage)">
                     <td>{{pnt.Name}}</td>
                     <td>{{pnt.X}}</td>
@@ -55,7 +55,7 @@
         sub.Notify();
     };
 	sub.SortedByClass = function(name) { return (name === sub.SortedBy) ? "text-danger":"";};
-    equilibrium.Bind(sub, $('#appdiv'));
+    sub.Bind($('#appdiv')).Notify();
 	var tableObserver = sub.GetAllObservers()[3];
 </script>
 
