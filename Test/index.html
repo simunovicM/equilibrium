@@ -15,7 +15,7 @@
 			Insert number (<b>adds Math.pow(num,num) of elements</b>):
 			<input id="2" class="col-sm-3" emonchange="AddTableData(Math.pow(this.prop('id'),addnum))" empropdisabled="Not(checked)" title="{{TitleEnabledText(Not(checked))}}" emvalue="addnum"/>
 		</div>
-		<div class="col-sm-5 inline-block" id="historyDiv" style="display: none;">
+		<div class="col-sm-5 inline-block" id="historyDiv">
 			<button class="btn btn-info" emonclick="HistoryGo(-1)" empropdisabled="Not(CanGo(-1))">Undo</button>
 			<button class="btn btn-info" emonclick="HistoryGo(1)" empropdisabled="Not(CanGo(1))">Redo</button>
 			<button class="btn btn-warning ml-5" emonclick="SaveHistory()">Save state</button>
@@ -53,17 +53,6 @@
 		</div>
 	</span>
 	
-	<span class="p-3 mb-2 col-sm-12 inline-block">
-		<div class="row justify-content-between">
-			<div class="col-4">
-				<input class="m-1" id="{{SomeNames[0]}}" type="checkbox" emchecked="checked"/>
-				<label for="{{SomeNames[0]}}"><b emvisible="{{Not(checked)}}">Click to enable elements</b><b emvisible="{{checked}}">Click to disable elements</b></label>
-			</div>
-			<div class="col-4">
-				<button class="btn btn-lg btn-success" emonclick="showHistory()"/>Click here for something special!</button>
-			</div>
-		</div>
-	</span>
 	<div class="p-3 mb-2 col-12 row">
 		<label class="col-sm-12 text-center">
 			You have total of {{TestData.length}} elements
@@ -126,9 +115,6 @@
 	var TitleEnabledText = function(isEnabled) {
 		return (isEnabled) ? "Not enabled for editing!" : "You can edit this!";
 	};
-	var showHistory = function() {
-		$('#historyDiv').show();
-	};
 	var SaveHistory = function() {
 		storage.set("historyState", historyObserver.GetAllData());
 	};
@@ -165,11 +151,5 @@
 	}
 	sub.SomeNames = ["rand1", "rand2", "rand3"];
     sub.Bind($('#elementId')).Notify();
-	
-	function isPartOfElementInView(elem){
-		var toptobottom = $(elem)[0].getBoundingClientRect().top - window.innerHeight;
-		var bottomtotop = $(elem)[0].getBoundingClientRect().bottom;
-		return toptobottom < 0 && bottomtotop >0 ;
-	};
 </script>
 </body>
