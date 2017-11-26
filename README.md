@@ -4,11 +4,8 @@ JavaScript binder - Create interactive UIs easier than ever before - perfect for
 even legacy one!
 
 Equilibrium is JavaScript binding library which connects your model with the view and take care it
-always gets rendered the right way.
-
-Equilibrium makes it painless to create interactive UIs. Design simple views for each state in your
-application, and equilibrium will efficiently update and render just the right components when you
-want it.
+always gets rendered the right way. Design simple views for each state in your application, and 
+equilibrium will efficiently update and render just the right components when you want it.
 
 Let me get straight to the point. When creating html elements, if you want to bind some property
 or function with your existing model you will do it using brackets {{ }} - equilibrium will replace
