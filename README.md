@@ -1,21 +1,21 @@
 ![](image.png)
 
-Javascript binder - Create interactive UIs easier then ever before - perfect for any existing project,
+JavaScript binder - Create interactive UIs easier than ever before - perfect for any existing project,
 even legacy one!
 
-I always liked the way angularjs binds elements (and did not like the way it doesn't support other
-UIs). In the company I work right now it was not possibile to implement angularjs into existing 
-software. So, I had to build my own binder - equilibrium.
+Equilibrium is JavaScript binding library which connects your model with the view and take care it
+always gets rendered the right way.
 
-And, yes, it overgrovth itself and became something more than just a binder. Equilibrium works with
-all UIs and in almost all conditions and will fit in any existing project with no problem at all.
+Equilibrium makes it painless to create interactive UIs. Design simple views for each state in your
+application, and equilibrium will efficiently update and render just the right components when you
+want it.
 
 Let me get straight to the point. When creating html elements, if you want to bind some property
 or function with your existing model you will do it using brackets {{ }} - equilibrium will replace
 those values, or using attributes - emon... (for events) or emprop... (for properties) and emattr...
 (for attributes). For example &lt;input id="{{GetInputId()}}" empropvalue="inputValue" /&gt;
 will replace {{GetInputId()}} with result of that function and will insert inputValue into property
-'value'. emvalue, emchecked are special props that do 2 way binding - read and write. Writting is 
+'value'. emvalue, emchecked are special props that do 2 way binding - read and write. Writing is 
 triggered with onchanged and onclick functions. 
 
 emrepeat is used like forEach. So, if you want to enumerate all products and draw it, you will write
@@ -25,13 +25,9 @@ You have one extra property - emvisible - uses jquery show/hide functions.
 
 Oh, yes, you can implement UNDO, REDO, SAVE STATE and LOAD STATE. And it's just a few lines of code.
 
-Equilibrium makes it painless to create interactive UIs. Design simple views for each state in your
-application, and equilibrium will efficiently update and render just the right components when you
-want it.
-
 Equilibrium supports all newer browsers, and bunch of old ones (from IE8).
 
-Downlad data from Test directory to have a glance on what it can do, or test it directly on:
+Download data from Test directory to have a glance on what it can do, or test it directly on:
 
 http://equilibrium.byethost7.com/index.html
 
