@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script src="jquery-3.1.1.js"></script>
     <script src="equilibrium.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<script src="tether.min.js"></script>
+	<script src="bootstrap.min.js"></script>
+	<link rel="stylesheet" href="bootstrap.min.css">
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
     <link href="iChemistry/NewStyle/commonV4.css" rel="stylesheet" />
@@ -30,6 +32,7 @@
         </div>
 
         <div id="symbol_wrapper" class="inline-block">
+			Use shift key for multi-select
 			<div class='m-3'>
             <div class="d-inline" emrepeat='symbol in allSymbols' emfilter="FilterAllSymbols(symbol)">
                 <div class="symbol mx-25 m-3 {{BorderClass(index)}}">

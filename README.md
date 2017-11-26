@@ -1,8 +1,8 @@
-Javascript binder - Bind data like never before - perfect for legacy projects
+Javascript binder - Bind data like never before - perfect for any existing project!
 
 I always liked the way angularjs binds elements (and did not like the way it doesn't support other
 UIs). In the company I work right now it was not possibile to implement angularjs into existing 
-software. So, I had to build my own binder called equilibrium.
+software. So, I had to build my own binder - equilibrium.
 
 And, yes, it overgrovth itself and became something more than just a binder. Equilibrium works with
 all UIs and in almost all conditions and will fit in any existing project with no problem at all.
@@ -22,4 +22,8 @@ You have one extra property - emvisible - uses jquery show/hide functions.
 
 Oh, yes, you can implement UNDO, REDO, SAVE STATE and LOAD STATE. And it's just a few lines of code.
 
-Check existing Index.html to have a glance on what it can do.
+Downlad data from Test directory to have a glance on what it can do, or test it directly on:
+
+http://equilibrium.byethost7.com/index.html
+http://equilibrium.byethost7.com/index_s.html
+http://equilibrium.byethost7.com/index_dt.html
