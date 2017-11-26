@@ -444,11 +444,12 @@ equilibrium.CreateRepeatObserverFromElement = function (element) {
 equilibrium.AttachFiltersToObserver = function (obs, element) {
     var filterattr = element.attributes['emfilter'];
     if (filterattr) {
+		var filterValue = filterattr.value;
         var fnc = function (dat, index, subject, topParent, repeatPropertyShort) {
             subject = equilibrium.CopyAllProperties(subject);
             subject[repeatPropertyShort] = dat;
             subject.index = index;
-            var scope = equilibrium.getScopeFromString(subject, filterattr.value, null, null, topParent);
+            var scope = equilibrium.getScopeFromString(subject, filterValue, null, null, topParent);
             return equilibrium.scopeValue(scope.scope, scope.property, subject);
         };
         obs.FilterFunctions.push(fnc);
@@ -458,10 +459,11 @@ equilibrium.AttachFiltersToObserver = function (obs, element) {
 equilibrium.AttachSortToObserver = function (obs, element) {
     var sortattr = element.attributes['emsort'];
     if (sortattr) {
+		var sortValue = sortattr.value;
         var fnc = function (dats, subject, topParent, repeatProperty) {
             subject = equilibrium.CopyAllProperties(subject);
             subject[repeatProperty] = dats;
-            var scope = equilibrium.getScopeFromString(subject, sortattr.value, null, null, topParent);
+            var scope = equilibrium.getScopeFromString(subject, sortValue, null, null, topParent);
             return equilibrium.scopeValue(scope.scope, scope.property, subject);
         };
         obs.SortFunctions.push(fnc);
@@ -591,7 +593,7 @@ equilibrium.GetPropValues = function () {
             equilibrium.insertPropToScope(subject, control.attr(name));
         else
             val = equilibrium.scopeValue(scope.scope, scope.property, scope.topParent);
-        control.prop(property, val);
+        control.prop(property, val != null ? val : null);
         if (val === undefined && control.is("select"))
             control.prop("selectedIndex", -1);
     };
