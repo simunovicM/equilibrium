@@ -1,4 +1,6 @@
-Javascript binder - Bind data like never before - perfect for any existing project!
+![](image.png)
+
+Javascript binder - Bind data like never before - perfect for any existing project, even legacy one!
 
 I always liked the way angularjs binds elements (and did not like the way it doesn't support other
 UIs). In the company I work right now it was not possibile to implement angularjs into existing 
@@ -22,8 +24,14 @@ You have one extra property - emvisible - uses jquery show/hide functions.
 
 Oh, yes, you can implement UNDO, REDO, SAVE STATE and LOAD STATE. And it's just a few lines of code.
 
+Equilibrium supports all newer browsers 
+
 Downlad data from Test directory to have a glance on what it can do, or test it directly on:
 
 http://equilibrium.byethost7.com/index.html
+
 http://equilibrium.byethost7.com/index_s.html
+
 http://equilibrium.byethost7.com/index_dt.html
+
+http://equilibrium.byethost7.com/index_s_ie8.html - IE8 test page
