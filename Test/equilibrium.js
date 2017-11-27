@@ -644,7 +644,7 @@ equilibrium.GetAttrValues = function () {
     return equilibrium.allAttrFncs.map(function (f) { return { name: 'emattr' + f, property: f, on: 'null', fnc: fnc, fncon: fncempty }; });
 }
 equilibrium.getFunctionParameters = function (scope, str) {
-    var scopeSplit = equilibrium.splitParameters(str, ',');
+    var scopeSplit = equilibrium.splitParameters(str, ',').map(function(f) { return f.trim(); });
     var pars = scopeSplit.map(function (f) {
         var fscope = equilibrium.getScopeFromString(scope, f);
         if (fscope == null)
