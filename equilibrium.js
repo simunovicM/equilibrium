@@ -156,6 +156,22 @@ if (!Array.prototype.last) {
         return this[this.length - 1];
     }
 }
+if (!Array.prototype.distinct) {
+    Array.prototype.distinct = function () {
+        return this.filter(function (value, index, self) { return self.indexOf(value) === index; });
+    };
+}
+if (!Array.prototype.mapmany)
+    Array.prototype.mapmany = function (mapper) {
+        return this.reduce(function (prev, curr, i) {
+            return prev.concat(mapper(curr));
+        }, []);
+    };
+if (!Array.prototype.max)
+    Array.prototype.max = function (property) {
+        var mapped = (property == null) ? this.map(function(f) { return f; }) : this.map(function(f) { return f[property]; });
+        return mapped.sort().last();
+    };
 if (!String.prototype.startsWith) {
     String.prototype.startsWith = function (f) {
         if (this == null || this.length === 0 || this.length < f.length)
