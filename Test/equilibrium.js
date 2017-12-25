@@ -412,7 +412,8 @@ equilibrium.ElementObserver = function ($elem, pattern) {
     this.Subject = null;
     this.Parent = null;
     this.ParentObserver = null;
-
+	this.IfControl = $elem;
+	
     this.Update = function (dat) {
         observer.Redraw();
     }
@@ -637,12 +638,34 @@ equilibrium.GetPropValues = function () {
             equilibrium.scopeValue(fncscope.scope, fncscope.property, fncscope.topParent);
         };
     };
+	var emptycomment = $('<!---->')[0];;
+    var fncif = function (property, subject, observer, control, name) {
+        var scope = equilibrium.getScopeFromString(subject, control.attr(name), null, control);
+        var val = null;
+        if (scope === undefined)
+            equilibrium.insertPropToScope(subject, control.attr(name));
+        else
+            var val = equilibrium.scopeValue(scope.scope, scope.property, scope.topParent);
+                               
+		control = control[0];
+		if (val) {
+			if (observer.IfControl != control) {
+				observer.IfControl.replaceWith(control);
+				observer.IfControl = control;
+			};
+		} else if (observer.IfControl == control) {
+			var com = emptycomment.cloneNode(false);
+			control.replaceWith(com);
+			observer.IfControl = com;
+		};
+    };
     var fncempty = function () { return; };
     return [
-			{ name: 'emchecked', property: 'checked', on: 'click', fnc: fnc, fncon: fncon },
-			{ name: 'emvalue', property: 'value', on: 'change', fnc: fnc, fncon: fncon },
-			{ name: 'emvisible', property: 'null', on: 'null', fnc: fnctoggle, fncon: fncempty }
-    ].concat(equilibrium.allPropFncs.map(function (f) { return { name: 'emprop' + f, property: f, on: 'null', fnc: fnc, fncon: fncempty }; }));
+		{ name: 'emchecked', property: 'checked', on: 'click', fnc: fnc, fncon: fncon },
+		{ name: 'emvalue', property: 'value', on: 'change', fnc: fnc, fncon: fncon },
+		{ name: 'emvisible', property: 'null', on: 'null', fnc: fnctoggle, fncon: fncempty },
+		{ name: 'emif', property: 'null', on: 'null', fnc: fncif, fncon: fncempty }
+    ].concat(equilibrium.allPropFncs.map(function (f) { return { name: 'emprop' + f, property: f, on: 'null', fnc: fnc, fncon: fncempty }; }));	
 }
 equilibrium.allAttrFncs = []; // ["classList", "className", "clientHeight", "clientLeft", "clientTop", "clientWidth", "checked", 'disabled', "draggable", "hidden", "id", "isContentEditable", "lang", "offsetHeight", "offsetLeft", "offsetTop", "offsetWidth", "scrollHeight", "scrollTop", "scrollWidth", "slot", "spellcheck", 'src', "tabIndex", "title", "translate", "type", "value"];
 equilibrium.GetAttrValues = function () {
