@@ -41,13 +41,6 @@ if (!('find' in Array.prototype)) {
         return null;
     };
 }
-if (!Array.prototype.find) {
-    Array.prototype.find = function (fnc) {
-        for (var i = 0; i < this.length; i++)
-            if (fnc(this[i]))
-                return this[i];
-    }
-}
 // Add ECMA262-5 Array methods if not supported natively
 //
 if (!('indexOf' in Array.prototype)) {
@@ -196,9 +189,38 @@ if (!String.prototype.endsWith) {
         return true;
     }
 }
+if (!Array.prototype.groupBy)
+	Array.prototype.groupBy = function(propFnc) {
+	   return this.reduce(function(groups, item) {
+		 var val = propFnc(item);
+		 groups[val] = groups[val] || [];
+		 groups[val].push(item);
+		 return groups;
+	   }, {})
+	}
 if (!String.prototype.trim) {
     String.prototype.trim = function () { return $.trim(this); }
 }
+String.prototype.replaceAll = String.prototype.replaceAll ||
+    function (fromString, toString) {
+        return this.replace(new RegExp(escapeRegExp(fromString), 'g'), toString);
+    };
+String.prototype.replaceWords = String.prototype.replaceWords ||
+    function (fromString, toString) {
+        return this.replace(new RegExp('\\b' + escapeRegExp(fromString) + '\\b', 'g'), toString);
+    };
+String.prototype.toggle = String.prototype.toggle ||
+    function (word, bln) {
+        var reg = new RegExp('\\b' + escapeRegExp(word) + '\\b', 'g');
+        if (bln == null)
+            bln = !(reg.test(this));
+ 
+        if (bln)
+            return reg.test(this) ? this : this.trim() + ' ' + word;
+        else
+            return this.replaceWords(word, '').split(' ').filter(function (f) { return !IsStringNullOrEmpty(f); }).join(' ');
+    };
+	
 if (!HashCode)
     function HashCode(obj) {
         var str = (typeof obj === 'object') ? JSON.stringify(obj) : obj;
