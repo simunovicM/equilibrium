@@ -5,6 +5,19 @@
             callback();
     }, 0);
 };
+function RandomLetters(len) { return Math.random().toString(36).substring(len); }
+
+var Encode = function() {
+	var encodeDiv = $('<div />');
+	return function(str) {
+		return encodeDiv.text(str).html();
+	}
+}();
+function EncodeWithQuota(str) {
+    return Encode(str).replaceAll('"', '&quot;');
+}
+var isFunction = function (obj) { return (typeof obj === "function"); }
+var isObject = function (obj) { return (typeof obj === "object"); }
 
 if (!IsStringNullOrEmpty)
     function IsStringNullOrEmpty(str) { return (!str || !str.trim()); }
@@ -108,7 +121,7 @@ if (!('some' in Array.prototype)) {
 }
 if (!Array.prototype.findby) {
     Array.prototype.findby = function (prop, value) {
-        if (value == null)
+        if (prop == null)
             return this.find(function (f) { return f == value; });
         else
             return this.find(function (f) { return f[prop] == value; });
@@ -116,7 +129,7 @@ if (!Array.prototype.findby) {
 }
 if (!Array.prototype.filterby) {
     Array.prototype.filterby = function (prop, value) {
-        if (value == null)
+        if (prop == null)
             return this.filter(function (f) { return f == value; });
         else
             return this.filter(function (f) { return f[prop] == value; });
@@ -126,10 +139,13 @@ if (!Array.prototype.sortby) {
     Array.prototype.sortby = function (prop, sortfnc) {
         if (sortfnc == null)
             sortfnc = function (f, g) { return f > g; };
+        var propfnc = prop;
+        var propfnc = (isFunction(prop) ? prop : function(f) { return f[prop]; });
+
         var retdata = this.map(function (f) { return f; });
         for (var i = 0; i < retdata.length - 1; i++)
             for (var j = i + 1; j < retdata.length; j++)
-                if (sortfnc(retdata[i][prop], retdata[j][prop])) {
+                if (sortfnc(propfnc(retdata[i]), propfnc(retdata[j]))) {
                     var temp = retdata[i];
                     retdata[i] = retdata[j];
                     retdata[j] = temp;
@@ -164,6 +180,22 @@ if (!Array.prototype.max)
     Array.prototype.max = function (property) {
         var mapped = (property == null) ? this.map(function(f) { return f; }) : this.map(function(f) { return f[property]; });
         return mapped.sort().last();
+    };
+if (!Array.prototype.first)
+    Array.prototype.first = function () {
+        return this[0];
+    };
+if (!Array.prototype.firstOrDefault)
+    Array.prototype.firstOrDefault = function () {
+        return this.length == 0 ? null : this.first();
+    };
+if (!Array.prototype.last)
+    Array.prototype.last = function () {
+        return this[this.length - 1];
+    };
+if (!Array.prototype.lastOrDefault)
+    Array.prototype.lastOrDefault = function () {
+        return this.length == 0 ? null : this.last();
     };
 if (!String.prototype.startsWith) {
     String.prototype.startsWith = function (f) {
@@ -220,7 +252,27 @@ String.prototype.toggle = String.prototype.toggle ||
         else
             return this.replaceWords(word, '').split(' ').filter(function (f) { return !IsStringNullOrEmpty(f); }).join(' ');
     };
-	
+function escapeRegExp(str) {
+    return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+}
+String.prototype.formatUnicorn = String.prototype.formatUnicorn ||
+    function() {
+        "use strict";
+        var str = this.toString();
+        if (arguments.length) {
+            var t = typeof arguments[0];
+            var key;
+            var args = ("string" === t || "number" === t) ?
+                Array.prototype.slice.call(arguments)
+                : arguments[0];
+
+            for (key in args) {
+                str = str.replace(new RegExp("\\{" + key + "\\}", "gi"), args[key]);
+            }
+        }
+
+        return str;
+    };
 if (!HashCode)
     function HashCode(obj) {
         var str = (typeof obj === 'object') ? JSON.stringify(obj) : obj;
@@ -255,6 +307,12 @@ equilibrium.DataSubject = function () {
 		equilibrium.Bind(this, $(element));
 		return this;
 	};
+}
+equilibrium.SimpleObserver = function(fn) {
+    var fn = fn;
+    this.Update = function (data) {
+        fn();
+    }
 }
 equilibrium.HistoryObserver = function (maxObservings) {
     var historyData = [];
@@ -298,6 +356,7 @@ equilibrium.RepeatObserver = function ($comment, drawfnc) {
     this.RepeatPropertyShort = '';
     this.DrawedElements = [];
     this.MaxDrawingsAtTime = 0;
+    this.Order = 0;
     var templateElement = drawfnc();
 
     this.Update = function () {
@@ -418,6 +477,7 @@ equilibrium.RepeatObserver = function ($comment, drawfnc) {
                 observers.push(obs);
             });
 
+            observers = observers.sortby('Order');
             observers.push(new equilibrium.ElementObserver(element));
             observers.forEach(function (f) {
                 f.ParentCollection = observers;
@@ -435,6 +495,7 @@ equilibrium.ElementObserver = function ($elem, pattern) {
     this.Parent = null;
     this.ParentObserver = null;
 	this.IfControl = $elem;
+    this.Order = 1;
 	
     this.Update = function (dat) {
         observer.Redraw();
@@ -1002,7 +1063,7 @@ equilibrium.ItemHasAttributes = function (element, attributes) {
 }
 equilibrium.GetAllAttributeNames = function (element) {
     return equilibrium.GetAllChildrens(element)
-		.map(function (f) { return $.makeArray(f.attributes).map(function (f) { return f.name; }); })
+		.map(function (f) { return equilibrium.ToArray(f.attributes).map(function (f) { return f.name; }); })
 		.filter(function (f) { return f.length > 0; });
 };
 
@@ -1056,3 +1117,5 @@ function UnloadDataOnExit(fnc) {
     $("#MainContentContainer").on("OnPageUnload", fnc);
 }
 function GetLocationRoot() { return window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1); };
+
+function EmptyFunction() {}
