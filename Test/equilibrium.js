@@ -153,6 +153,13 @@ if (!Array.prototype.sortby) {
         return retdata;
     }
 }
+if (!('pushMany' in Array.prototype)) {
+    Array.prototype.pushMany = function (arr) {
+        var self = this;
+        arr.forEach(function (f) { self.push(f); });
+        return self;
+    };
+}
 if (!Array.prototype.remove) {
     Array.prototype.remove = function (dat) {
         var ind = this.indexOf(dat);
