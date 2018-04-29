@@ -229,14 +229,22 @@ if (!String.prototype.endsWith) {
     }
 }
 if (!Array.prototype.groupBy)
-	Array.prototype.groupBy = function(propFnc) {
-	   return this.reduce(function(groups, item) {
-		 var val = propFnc(item);
-		 groups[val] = groups[val] || [];
-		 groups[val].push(item);
-		 return groups;
-	   }, {})
-	}
+    Array.prototype.groupBy = function(propFnc) {
+        return this.reduce(function(groups, item) {
+            var val = propFnc(item);
+            var find = groups.find(function (f) { return f.key == val; });
+            if (find != null)
+                find.items.push(item);
+            else
+                groups.push({ key: val, items: [item] });
+            return groups;
+        }, []);
+    };
+if (!Array.prototype.unique)
+    Array.prototype.unique = function(propFnc) {
+        return this.groupBy(propFnc)
+            .map(function(f) { return f.items.first(); });
+    };
 if (!String.prototype.trim) {
     String.prototype.trim = function () { return $.trim(this); }
 }
