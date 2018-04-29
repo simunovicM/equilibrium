@@ -140,7 +140,7 @@ if (!Array.prototype.sortby) {
         if (sortfnc == null)
             sortfnc = function (f, g) { return f > g; };
         var propfnc = prop;
-        var propfnc = (isFunction(prop) ? prop : function(f) { return f[prop]; });
+        var propfnc = (isFunction(prop) ? prop : function (f) { return f[prop]; });
 
         var retdata = this.map(function (f) { return f; });
         for (var i = 0; i < retdata.length - 1; i++)
@@ -300,7 +300,21 @@ if (!HashCode)
         }
         return hash;
     }
-var equilibrium = new Object();
+
+Number.prototype.RangeTo = function (intTo) {
+    var intFrom = parseInt(this);
+    var step = intFrom <= intTo ? 1 : -1;
+    var ret = [];
+    do {
+        ret.push(intFrom);
+        if (intFrom == intTo)
+            break;
+        intFrom += step;
+    } while (true);
+    return ret;
+}
+
+var equilibrium = equilibrium || new Object();
 equilibrium.DataSubject = function () {
     var observers = [];
 
@@ -371,7 +385,6 @@ equilibrium.RepeatObserver = function ($comment, drawfnc) {
     this.RepeatPropertyShort = '';
     this.DrawedElements = [];
     this.MaxDrawingsAtTime = 0;
-    this.Order = 0;
     var templateElement = drawfnc();
 
     this.Update = function () {
@@ -1123,9 +1136,7 @@ equilibrium.PropertiesToArray = function (fromObject) {
     return arr;
 }
 equilibrium.ToArray = function (fromObject) {
-    var arr = [];
-    for (var i = 0; i < fromObject.length; i++) arr.push(fromObject[i]);
-    return arr;
+    return fromObject.length == 0 ? [] : (0).RangeTo(fromObject.length - 1).map(function (f) { return fromObject[f]; });
 };
 
 function UnloadDataOnExit(fnc) {
