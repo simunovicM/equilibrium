@@ -13,7 +13,7 @@
 	<div class="p-3 mb-2 col-sm-12 {{spanClass}} row">
 		<div class="col-sm-7">
 			Insert number (<b>adds Math.pow(num,num) of elements</b>):
-			<input id="2" class="col-sm-3" emonchange="AddTableData(Math.pow(this.prop('id'),addnum))" empropdisabled="Not(checked)" title="{{TitleEnabledText(Not(checked))}}" emvalue="addnum"/>
+			<input id="2" class="col-sm-3" emonchange="AddTableData(Math.pow(this.id,addnum))" empropdisabled="Not(checked)" title="{{TitleEnabledText(Not(checked))}}" emvalue="addnum"/>
 		</div>
 		<div class="col-sm-5 inline-block" id="historyDiv">
 			<button class="btn btn-info" emonclick="HistoryGo(-1)" empropdisabled="Not(CanGo(-1))">Undo</button>
@@ -150,6 +150,6 @@
 		sub.Notify();
 	}
 	sub.SomeNames = ["rand1", "rand2", "rand3"];
-    sub.Bind($('#elementId')).Notify();
+    sub.Bind(document.getElementById('elementId')).Notify();
 </script>
 </body>
